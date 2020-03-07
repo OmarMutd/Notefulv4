@@ -8,8 +8,8 @@ import NotePageMain from '../NotePageMain/NotePageMain'
 import AddFolder from '../AddFolder/AddFolder'
 import AddNote from '../AddNote/AddNote'
 import ApiContext from '../ApiContext'
-
 import './App.css'
+import config from '../config';
 
 class App extends Component {
 
@@ -25,29 +25,24 @@ class App extends Component {
   }
   
   componentDidMount() {
-    
-    try{
     Promise.all([
-      fetch('https://noteful-db.herokuapp.com/notes'),
-      fetch('https://noteful-db.herokuapp.com/folders')
+      fetch(`${config.API_ENDPOINT}/api/folders`),
+      fetch(`${config.API_ENDPOINT}/api/notes`)
     ])
-      .then(([notesRes, foldersRes]) => {
-        if (!notesRes.ok)
-          return notesRes.json().then(e => Promise.reject(e))
-        if (!foldersRes.ok)
-          return foldersRes.json().then(e => Promise.reject(e))
-
-        return Promise.all([
-          notesRes.json(),
-          foldersRes.json(),
-        ])
+      .then(([foldersRes, notesRes]) => {
+        if(!notesRes.ok)
+          return notesRes.json().then(e => Promise.reject(e));
+        if(!foldersRes.ok)
+          return foldersRes.json().then(e => Promise.reject(e));
+        
+          return Promise.all([notesRes.json(), foldersRes.json()]);
       })
       .then(([notes, folders]) => {
-        this.setState({ notes, folders })
+        this.setState({notes, folders});
       })
-      }catch(error){
-        console.error( error)
-      }
+      .catch(error => {
+        console.error({error});
+      });       
   }
 
   componentDidCatch(error, errorInfo){
